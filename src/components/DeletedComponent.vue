@@ -20,19 +20,14 @@
         <td><img :src="item[1].imagePath" width="80" height="120" /></td>
         <td v-html="categoryName(item[1].category_id)"></td>
         <!-- <td v-html="item[1].category_id"></td> -->
-        <td>
-          <router-link :to="{ name: 'about', params: { id: item[0] } }">
-            <button>編集</button>
-          </router-link>
-        </td>
-        <td><button @click="deleted(item[0])">削除</button></td>
+        <td><button @click="resurrection(item[0])">復活</button></td>
       </tr>
     </table>
   </div>
 </template>
 
 <script>
-import { db, FirebaseTimestamp } from "../firebase/index";
+import { db } from "../firebase/index";
 export default {
   name: "HelloWorld",
   data() {
@@ -48,8 +43,8 @@ export default {
   methods: {
     getWorks() {
       db.collection("works")
-        .orderBy("updated_at", "desc")
-        .where("deleted_flg", "==", false)
+        .orderBy("deleted_at", "desc")
+        .where("deleted_flg", "==", true)
         .get()
         .then((query) => {
           const workList = [];
@@ -84,13 +79,13 @@ export default {
       }
       return categoryName;
     },
-    deleted(id) {
-      if (confirm("削除しますか？")) {
+    resurrection(id) {
+      if (confirm("復活させますか？")) {
         db.collection("works")
           .doc(id)
           .update({
-            deleted_at: FirebaseTimestamp.now(),
-            deleted_flg: true,
+            deleted_flg: false,
+            deleted_at: "",
           });
         this.isLoadingFlg = false;
         this.works = [];

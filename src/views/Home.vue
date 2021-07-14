@@ -5,25 +5,25 @@
 </template>
 
 <script>
-import firebase from "firebase"
+import firebase from "firebase";
 // @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
+import HelloWorld from "@/components/HelloWorld.vue";
 
 export default {
-  name: 'home',
+  name: "home",
   components: {
-    HelloWorld
+    HelloWorld,
   },
   mounted() {
-    firebase.auth().onAuthStateChanged(user => {
-      if(user == null) {
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user == null) {
         this.$router.push("/signin");
       }
-    })
+    });
     //1時間後ログアウト
     setTimeout(() => {
-      firebase.auth().signOut()
+      firebase.auth().signOut();
     }, 3600000);
-  }
-}
+  },
+};
 </script>

@@ -7,23 +7,32 @@
 </template>
 
 <script>
-import firebase from "firebase"
-import WorkAdd from '../components/WorkAdd'
+import firebase from "firebase";
+import WorkAdd from "../components/WorkAdd";
 export default {
   components: {
-    WorkAdd
+    WorkAdd,
+  },
+  data() {
+    return {
+      id: "",
+    };
   },
   mounted() {
-    firebase.auth().onAuthStateChanged(user => {
-      if(user == null) {
+    const id = window.location.pathname.split("/about/")[1];
+    this.id = id;
+    //console.log(this.id);
+
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user == null) {
         this.$router.push("/signin");
       }
-    })
+    });
 
-     //1時間後ログアウト
+    //1時間後ログアウト
     setTimeout(() => {
-      firebase.auth().signOut()
+      firebase.auth().signOut();
     }, 3600000);
-  }
-}
+  },
+};
 </script>
