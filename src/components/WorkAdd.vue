@@ -97,10 +97,15 @@
         </tr>
       </tbody>
     </table>
+
+    <div class="load">
+      <pulse-loader :loading="loading"></pulse-loader>
+    </div>
   </div>
 </template>
 
 <script>
+import PulseLoader from "vue-spinner/src/PulseLoader";
 import { db, storage, FirebaseTimestamp } from "../firebase/index";
 import { apiUrl } from "../seacretDirectory/seacret";
 import axios from "axios";
@@ -123,7 +128,11 @@ export default {
       isCategoryIdFlg: false,
       isLoadingFlg: false,
       isTweetFlg: false,
+      loading: true,
     };
+  },
+  components: {
+    PulseLoader,
   },
   created() {
     db.collection("categories")
@@ -136,6 +145,7 @@ export default {
           categoryList.push(data);
           this.categories = categoryList;
           this.isLoadingFlg = true;
+          this.loading = false;
         });
       });
   },
@@ -152,6 +162,7 @@ export default {
           this.imagePath = data.imagePath;
           this.categoryId = data.category_id;
           this.isLoadingFlg = true;
+          this.loading = false;
         });
     }
   },
@@ -192,6 +203,7 @@ export default {
       });
     },
     add() {
+      this.loading = true;
       this.isLoadingFlg = false;
       let errFlg = this.validation();
       if (!errFlg) {
@@ -224,9 +236,11 @@ export default {
           });
       } else {
         this.isLoadingFlg = true;
+        this.loading = false;
       }
     },
     edit() {
+      this.loading = true;
       this.isLoadingFlg = false;
       let errFlg = this.validation();
 
@@ -257,6 +271,7 @@ export default {
           });
       } else {
         this.isLoadingFlg = true;
+        this.loading = false;
       }
     },
     validation() {

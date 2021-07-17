@@ -28,20 +28,28 @@
         <td><button @click="deleted(item[0])">削除</button></td>
       </tr>
     </table>
+
+    <div class="load">
+      <pulse-loader :loading="loading"></pulse-loader>
+    </div>
   </div>
 </template>
 
 <script>
+import PulseLoader from "vue-spinner/src/PulseLoader";
 import { db, FirebaseTimestamp } from "../firebase/index";
 export default {
   name: "HelloWorld",
   data() {
     return {
+      loading: true,
       isLoadingFlg: false,
       works: [],
     };
   },
-
+  components: {
+    PulseLoader,
+  },
   created() {
     this.getWorks();
   },
@@ -58,6 +66,7 @@ export default {
             workList.push([doc.id, data]);
             this.works = workList;
             this.isLoadingFlg = true;
+            this.loading = false;
           });
         });
     },

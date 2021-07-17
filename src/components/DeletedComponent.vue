@@ -1,5 +1,5 @@
 <template>
-  <div class="hello">
+  <div class="delete-component">
     <table border="1" v-show="isLoadingFlg">
       <tr>
         <th>ID</th>
@@ -19,31 +19,37 @@
         <td v-html="nl2br(item[1].description)" style="text-align: left"></td>
         <td><img :src="item[1].imagePath" width="80" height="120" /></td>
         <td v-html="categoryName(item[1].category_id)"></td>
-        <!-- <td v-html="item[1].category_id"></td> -->
         <td><button @click="resurrection(item[0])">復活</button></td>
       </tr>
     </table>
+
+    <div class="load">
+      <pulse-loader :loading="loading"></pulse-loader>
+    </div>
   </div>
 </template>
 
 <script>
+import PulseLoader from "vue-spinner/src/PulseLoader";
 import { db } from "../firebase/index";
 export default {
   name: "HelloWorld",
   data() {
     return {
+      loading: true,
       isLoadingFlg: false,
       works: [],
     };
   },
-
+  components: {
+    PulseLoader,
+  },
   created() {
     this.getWorks();
   },
   methods: {
     getWorks() {
       db.collection("works")
-        .orderBy("deleted_at", "desc")
         .where("deleted_flg", "==", true)
         .get()
         .then((query) => {
@@ -53,6 +59,7 @@ export default {
             workList.push([doc.id, data]);
             this.works = workList;
             this.isLoadingFlg = true;
+            this.loading = false;
           });
         });
     },
