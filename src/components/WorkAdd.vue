@@ -155,7 +155,7 @@ export default {
       });
   },
   mounted() {
-    if (this.id != 0) {
+    if (this.id != "new") {
       db.collection("works")
         .doc(this.id)
         .get()

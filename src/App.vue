@@ -2,7 +2,7 @@
   <div id="app">
     <div id="nav">
       <router-link to="/">WorkList</router-link>｜
-      <router-link to="/about/0">WorkAdd</router-link>｜
+      <router-link to="/editor/new">WorkAdd</router-link>｜
       <router-link to="/deleted">WorkDeleted</router-link>
       <button @click="logout()" class="logout">logout</button>
     </div>
