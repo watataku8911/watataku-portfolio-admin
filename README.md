@@ -2,7 +2,7 @@
 
 > my portfolio site✌️
 
-[https://watataku-portfolio.web.app/](https://watataku-portfolio.web.app/)
+[https://watataku-portfolo.web.app/](https://watataku-portfolo.web.app/)
 
 ## Technology used
 

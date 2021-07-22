@@ -1,10 +1,5 @@
 <template>
   <div class="edit">
-    <div class="tweetButton">
-      <button @click="changeTweetFlg">ツイート切り替え</button>
-      <p v-if="!isTweetFlg">ツイートする</p>
-      <p v-else>ツイートしない</p>
-    </div>
     <p v-if="isTitleFlg" style="color: red;">タイトルが未入力です</p>
     <p v-if="isDescriptionFlg" style="color: red;">コメントが未入力です</p>
     <p v-if="isDropingFlg" style="color: red;">画像が選択されてない</p>
@@ -25,7 +20,7 @@
           </td>
         </tr>
         <tr>
-          <th>URL&nbsp;<span class="required">必須</span></th>
+          <th>URL</th>
           <td>
             <input
               type="text"
@@ -85,6 +80,16 @@
                 {{ item.category_name }}
               </option>
             </select>
+          </td>
+        </tr>
+        <tr>
+          <th>ツイート</th>
+          <td
+            style="display: flex; justify-content: space-around; width: 100%;"
+          >
+            <p v-if="!isTweetFlg">ツイートする</p>
+            <p v-else>ツイートしない</p>
+            <button @click="changeTweetFlg">ツイート切り替え</button>
           </td>
         </tr>
         <tr>
@@ -317,14 +322,9 @@ export default {
 .edit {
   width: 100%;
 }
-.tweetButton {
-  position: absolute;
-}
-.table {
-  margin: 20px auto;
-}
 td {
   width: 100px;
+  text-align: center;
 }
 .editImage {
   border: 1px solid #000;

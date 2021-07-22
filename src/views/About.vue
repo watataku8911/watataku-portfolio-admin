@@ -1,5 +1,5 @@
 <template>
-  <div class="about">
+  <div class="about" style="text-align: -webkit-center">
     <section>
       <WorkAdd />
     </section>
