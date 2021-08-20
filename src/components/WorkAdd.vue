@@ -93,10 +93,15 @@
           </td>
         </tr>
         <tr>
-          <td colspan="2" class="submit" v-if="id == 0" v-show="isLoadingFlg">
+          <td
+            colspan="2"
+            class="submit"
+            v-if="id == 'new'"
+            v-show="isLoadingFlg"
+          >
             <input type="submit" value="登録" @click="add()" />
           </td>
-          <td colspan="2" class="submit" v-if="id != 0" v-show="isLoadingFlg">
+          <td colspan="2" class="submit" v-else v-show="isLoadingFlg">
             <input type="submit" value="編集" @click="edit()" />
           </td>
         </tr>
