@@ -6,8 +6,9 @@
       <router-link to="/deleted">WorkDeleted</router-link>
       <button @click="logout()" class="logout">logout</button>
     </div>
-
-    <router-view />
+    <main class="site-main">
+      <router-view />
+    </main>
   </div>
 </template>
 
