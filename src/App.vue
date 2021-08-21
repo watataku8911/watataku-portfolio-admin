@@ -12,11 +12,12 @@
 </template>
 
 <script>
-import firebase from "firebase";
+import { auth } from "./firebase/index";
+
 export default {
   methods: {
     logout() {
-      firebase.auth().signOut();
+      auth.signOut();
     },
   },
 };
