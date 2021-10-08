@@ -327,10 +327,16 @@ export default {
 .edit {
   width: 100%;
 }
+
+.required {
+  color: red;
+}
+
 td {
   width: 100px;
   text-align: center;
 }
+
 .editImage {
   border: 1px solid #000;
   border-radius: 50%;
