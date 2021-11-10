@@ -379,6 +379,7 @@ export default {
 td {
   text-align: center;
 }
+
 @media screen and (min-width: 1026px) {
   .imgContent {
     width: 90%;
