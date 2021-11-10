@@ -1,66 +1,76 @@
 <template>
-    <div>
-        <p v-if="isEmailFlg">
-        <font color="red">メールアドレスを入力して下さい。</font>
-        </p>
-        <p v-if="isMachEmailFlg">
-        <font color="red">メールアドレスを正しく入力して下さい。</font>
-        </p>
-         <p v-if="isPasswdFlg">
-        <font color="red">パスワードを入力して下さい。</font>
-        </p>
-        <p v-if="isOkPasswdFlg">
-        <font color="red">8文字以上の半角英数字で入力して下さい</font>
-        </p>
-        <p v-if="isLoginErrFlg">
-        <font color="red">ログインに失敗しました。</font>
-        </p>
-        <h2>ログイン</h2>
-        <table border="1">
-            <tr>
-            <td>
-                <input
-                type="text"
-                placeholder="メールアドレス"
-                v-model="email"
-                value=""
-                class="loginHoge"
-                />
-            </td>
-            </tr>
-            <tr>
-            <td>
-                <p>※8文字以上で半角英数字</p>
-                <input
-                type="password"
-                placeholder="パスワード"
-                v-model="password"
-                value=""
-                class="loginHoge"
-                />
-            </td>
-            </tr>
-            <tr>
-            <td>
-                <button class="login-button" @click="login" v-show="!isLoadingFlg">
-                ログイン
-                </button>
-                <div class="loading">
-                <pulse-loader :loading="isLoadingFlg"></pulse-loader>
-                </div>
-            </td>
-            </tr>
-        </table>
-      </div>
+  <div>
+    <p v-if="isEmailFlg">
+      <font color="red">メールアドレスを入力して下さい。</font>
+    </p>
+    <p v-if="isMachEmailFlg">
+      <font color="red">メールアドレスを正しく入力して下さい。</font>
+    </p>
+    <p v-if="isPasswdFlg">
+      <font color="red">パスワードを入力して下さい。</font>
+    </p>
+    <p v-if="isOkPasswdFlg">
+      <font color="red">8文字以上の半角英数字で入力して下さい</font>
+    </p>
+    <p v-if="isLoginErrFlg">
+      <font color="red">ログインに失敗しました。</font>
+    </p>
+    <h2>ログイン</h2>
+    <table border="1">
+      <tr>
+        <th>Emailアドレス</th>
+        <td>
+          <TextInput
+            v-model="email"
+            type="text"
+            placeholder="Emailを入力してください。"
+            name="email"
+            :value="email"
+          />
+        </td>
+      </tr>
+      <tr>
+        <th>パスワード</th>
+        <td>
+          <TextInput
+            v-model="password"
+            type="password"
+            placeholder="パスワードを入力してください。※8文字以上で半角英数字"
+            name="password"
+            :value="password"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <Button
+            v-show="!isLoadingFlg"
+            :disabled="false"
+            msg="ログイン"
+            @push="login"
+          />
+        </td>
+      </tr>
+    </table>
+
+    <div class="load">
+      <pulse-loader :loading="isLoadingFlg"></pulse-loader>
+    </div>
+  </div>
 </template>
 
 <script>
-import {auth} from "../firebase/index"
-import PulseLoader from "vue-spinner/src/PulseLoader.vue";
+import { auth } from "../firebase/index";
+
+import PulseLoader from "vue-spinner/src/PulseLoader";
+import TextInput from "./UIKit/TextInput";
+import Button from "./UIKit/Button";
 
 export default {
-    components: {
-    PulseLoader
+  components: {
+    TextInput,
+    Button,
+    PulseLoader,
   },
   data() {
     return {
@@ -71,7 +81,7 @@ export default {
       isPasswdFlg: false, //パスワード未入力エラーフラグ
       isOkPasswdFlg: false, //半角英数字チェックフラグ
       isLoginErrFlg: false, //ログインエラーフラグ
-      isLoadingFlg: false //ローディングフラグ
+      isLoadingFlg: false, //ローディングフラグ
     };
   },
   methods: {
@@ -118,15 +128,14 @@ export default {
             this.isLoadingFlg = false;
           });
       }
-    }
-  }
-
-}
+    },
+  },
+};
 </script>
 
 <style scoped>
 table {
-    width: 100px;
-    margin: 0 auto;
+  width: 1000px;
+  margin: 0 auto;
 }
 </style>

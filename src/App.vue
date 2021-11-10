@@ -1,22 +1,28 @@
 <template>
   <div id="app">
+    <Button class="logout" :disabled="false" msg="logout" @push="logout" />
     <div id="nav">
       <router-link to="/">WorkList</router-link>｜
       <router-link to="/editor/new">WorkAdd</router-link>｜
       <router-link to="/deleted">WorkDeleted</router-link>
-      <button @click="logout()" class="logout">logout</button>
     </div>
-
-    <router-view />
+    <main class="site-main">
+      <router-view />
+    </main>
   </div>
 </template>
 
 <script>
-import firebase from "firebase";
+import { auth } from "./firebase/index";
+import Button from "./components/UIKit/Button";
+
 export default {
+  components: {
+    Button,
+  },
   methods: {
     logout() {
-      firebase.auth().signOut();
+      auth.signOut();
     },
   },
 };

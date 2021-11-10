@@ -1,85 +1,66 @@
 <template>
   <div class="edit">
-    <p v-if="isTitleFlg" style="color: red;">タイトルが未入力です</p>
-    <p v-if="isDescriptionFlg" style="color: red;">コメントが未入力です</p>
-    <p v-if="isDropingFlg" style="color: red;">画像が選択されてない</p>
-    <p v-if="isCategoryIdFlg" style="color: red;">カテゴリが未選択です</p>
+    <div class="load">
+      <pulse-loader :loading="loading"></pulse-loader>
+    </div>
     <table border="1" class="table" v-show="isLoadingFlg">
       <tbody>
         <tr>
           <th>タイトル&nbsp;<span class="required">必須</span></th>
           <td>
-            <input
-              type="text"
-              id="addWorkWname"
-              name="addWorkWname"
-              value=""
-              size="100"
+            <TextInput
               v-model="title"
+              type="text"
+              placeholder="タイトルを入力してください。"
+              name="addWorkWname"
+              :value="title"
             />
           </td>
         </tr>
         <tr>
           <th>URL</th>
           <td>
-            <input
-              type="text"
-              id="addWorkUrl"
-              name="addWorkUrl"
-              value=""
-              size="100"
+            <TextInput
               v-model="url"
+              type="text"
+              placeholder="URLを入力してください。"
+              name="addWorkUrl"
+              :value="url"
             />
           </td>
         </tr>
         <tr>
           <th>コメント&nbsp;<span class="required">必須</span></th>
           <td>
-            <textarea
-              id="addWorkBody"
+            <TextArea
+              v-model="description"
               name="addWorkBody"
+              placeholder="コメントを入力してください"
               cols="100"
               rows="15"
-              v-model="description"
-            ></textarea>
+              :value="description"
+            />
           </td>
         </tr>
         <tr>
           <th>画像&nbsp;<span class="required">必須</span></th>
           <td>
-            <input
-              type="file"
-              id="addWorkImage"
-              name="addWorkImage"
-              mulitple="multiple"
-              @change="onDrop"
-            />
-            <p v-if="this.imagePath">
-              <img
-                :src="this.imagePath"
-                width="200"
-                height="200"
-                :alt="this.imagePath"
-                class="editImage"
-              />
-            </p>
-            <p v-if="!this.imagePath" style="height: 200px;">
-              画像パスが出来ていません
-            </p>
+            <div class="imgContent">
+              <ImagePreview :imageUrl="imageUrl" />
+              <div class="module--spacing--largeSmall"></div>
+              <UploadFile @fileList="setFileList" />
+            </div>
           </td>
         </tr>
         <tr>
           <th>カテゴリー&nbsp;<span class="required">必須</span></th>
           <td>
-            <select name="categories" v-model="categoryId">
-              <option
-                v-for="item in this.categories"
-                v-bind:key="item.cetegory_id"
-                :value="item.category_id"
-              >
-                {{ item.category_name }}
-              </option>
-            </select>
+            <SelectBox
+              :categoryId="this.categoryId"
+              name="selectBox"
+              :options="this.categories"
+              @input="setCategoryId"
+            />
           </td>
         </tr>
         <tr>
@@ -89,31 +70,48 @@
           >
             <p v-if="!isTweetFlg">ツイートする</p>
             <p v-else>ツイートしない</p>
-            <button @click="changeTweetFlg">ツイート切り替え</button>
+            <Button
+              :disabled="false"
+              msg="ツイートの切り替え"
+              @push="changeTweetFlg"
+            />
           </td>
         </tr>
         <tr>
-          <td colspan="2" class="submit" v-if="id == 0" v-show="isLoadingFlg">
-            <input type="submit" value="登録" @click="add()" />
+          <td
+            colspan="2"
+            class="submit"
+            v-if="id == 'new'"
+            v-show="isLoadingFlg"
+          >
+            <Button :disabled="false" msg="登録" @push="add" />
           </td>
-          <td colspan="2" class="submit" v-if="id != 0" v-show="isLoadingFlg">
-            <input type="submit" value="編集" @click="edit()" />
+          <td colspan="2" class="submit" v-else v-show="isLoadingFlg">
+            <Button :disabled="false" msg="編集" @push="edit" />
           </td>
         </tr>
       </tbody>
     </table>
-
-    <div class="load">
-      <pulse-loader :loading="loading"></pulse-loader>
-    </div>
+    <p v-if="isTitleFlg" style="color: red;">タイトルが未入力です</p>
+    <p v-if="isDescriptionFlg" style="color: red;">コメントが未入力です</p>
+    <p v-if="isDropingFlg" style="color: red;">画像が選択されてない</p>
+    <p v-if="isCategoryIdFlg" style="color: red;">カテゴリが未選択です</p>
   </div>
 </template>
 
 <script>
-import PulseLoader from "vue-spinner/src/PulseLoader";
 import { db, storage, FirebaseTimestamp } from "../firebase/index";
 import { apiUrl } from "../seacretDirectory/seacret";
+import { genalateRandomFileName } from "../functions/common";
 import axios from "axios";
+
+import TextInput from "./UIKit/TextInput";
+import TextArea from "./UIKit/TextArea";
+import ImagePreview from "./UIKit/ImagePreview";
+import UploadFile from "./UIKit/UploadFile";
+import SelectBox from "./UIKit/SelectBox";
+import Button from "./UIKit/Button";
+import PulseLoader from "vue-spinner/src/PulseLoader";
 
 export default {
   data() {
@@ -122,10 +120,11 @@ export default {
       title: "",
       description: "",
       url: "",
-      imagePath: "",
+      fileList: null,
+      imageUrl: "",
       categoryId: "",
-
       categories: [],
+      isSelected: false,
 
       isTitleFlg: false,
       isDescriptionFlg: false,
@@ -137,148 +136,138 @@ export default {
     };
   },
   components: {
+    TextInput,
+    TextArea,
+    ImagePreview,
+    UploadFile,
+    SelectBox,
+    Button,
     PulseLoader,
   },
   created() {
-    db.collection("categories")
-      .orderBy("category_id")
-      .get()
-      .then((query) => {
-        const categoryList = [];
-        query.forEach((doc) => {
-          const data = doc.data();
-          categoryList.push(data);
-          this.categories = categoryList;
-          this.isLoadingFlg = true;
-          this.loading = false;
-        });
-      });
-  },
-  mounted() {
     if (this.id != "new") {
-      db.collection("works")
+      this.getCategories();
+      this.findByPk();
+    } else {
+      this.getCategories();
+    }
+  },
+  methods: {
+    // 画像がドロップされた時に実行
+    setFileList(fileList) {
+      this.fileList = fileList;
+      const imageUrl = URL.createObjectURL(fileList[0]);
+      this.imageUrl = imageUrl;
+    },
+    setCategoryId(input) {
+      this.categoryId = input;
+    },
+
+    // セレクトボックス生成メソッド
+    async getCategories() {
+      await db
+        .collection("categories")
+        .orderBy("category_id")
+        .get()
+        .then((query) => {
+          const categoryList = [];
+          query.forEach((doc) => {
+            const data = doc.data();
+            categoryList.push(data);
+            this.categories = categoryList;
+
+            this.isLoadingFlg = true;
+            this.loading = false;
+          });
+        })
+        .catch(() => {
+          alert("インターネット接続を確認してからもう一度行ってください");
+          this.getCategories();
+        });
+    },
+
+    // 主キー検索メソッド
+    async findByPk() {
+      await db
+        .collection("works")
         .doc(this.id)
         .get()
         .then((query) => {
           const data = query.data();
+
           this.title = data.title;
           this.url = data.url;
           this.description = data.description;
-          this.imagePath = data.imagePath;
+          this.imageUrl = data.imagePath;
           this.categoryId = data.category_id;
+
           this.isLoadingFlg = true;
           this.loading = false;
+        })
+        .catch(() => {
+          alert("インターネット接続を確認してからもう一度行ってください");
+          this.findByPk();
         });
-    }
-  },
-  methods: {
-    onDrop(event) {
-      //画像データ取得
-      const fileList = event.target.files || event.dataTransfer.files;
-      this.imageName = fileList[0].name;
-      let errFlg;
-      let blob;
-      if (fileList[0].type == "image/png") {
-        blob = new Blob(fileList, { type: "image/png" });
-        errFlg = false;
-      } else if (fileList[0].type == "image/jpg") {
-        blob = new Blob(fileList, { type: "image/jpg" });
-        errFlg = false;
-      } else if (fileList[0].type == "image/jpeg") {
-        blob = new Blob(fileList, { type: "image/jpeg" });
-        errFlg = false;
-      } else if (fileList[0].type == "image/gif") {
-        blob = new Blob(fileList, { type: "image/gif" });
-        errFlg = false;
-      } else {
-        errFlg = true;
-      }
-      if (!errFlg) {
-        //this.isLoadingFlg = true;
-        this.uploadImage(blob, fileList);
-      }
     },
-    uploadImage(blob, fileList) {
-      const storageRef = storage.ref();
-      const mountainsRef = storageRef.child(fileList[0].name);
-      mountainsRef.put(blob).then(() => {
-        mountainsRef.getDownloadURL().then((url) => {
-          this.imagePath = url;
-        });
-      });
-    },
+
+    // 追加ボタンが押されたら実行するメソッド
     add() {
       this.loading = true;
       this.isLoadingFlg = false;
       let errFlg = this.validation();
       if (!errFlg) {
-        this.isLoadingFlg = false;
-        db.collection("works")
-          .add({
-            title: this.title,
-            url: this.url,
-            description: this.description,
-            imagePath: this.imagePath,
-            category_id: this.categoryId,
-            created_at: FirebaseTimestamp.now(),
-            updated_at: FirebaseTimestamp.now(),
-            deleted_flg: false,
-            deleted_at: "",
+        let blob = new Blob(this.fileList, { type: "image/jpeg" });
+        let fileName;
+        fileName = genalateRandomFileName();
+        const uploadRef = storage.ref("images").child(fileName);
+        const uploadTask = uploadRef.put(blob);
+        uploadTask
+          .then(() => {
+            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+              this.addWork(downloadURL);
+            });
           })
-          .then((doc) => {
-            if (!this.isTweetFlg) {
-              axios
-                .post(apiUrl(doc.id))
-                .then(() => {
-                  this.$router.push("/");
-                })
-                .catch((err) => {
-                  alert(err);
-                });
-            } else {
-              this.$router.push("/");
-            }
+          .catch(() => {
+            alert("インターネット接続を確認してからもう一度行ってください");
           });
       } else {
         this.isLoadingFlg = true;
         this.loading = false;
       }
     },
+
+    // 編集ボタンが押されたら実行するメソッド
     edit() {
       this.loading = true;
       this.isLoadingFlg = false;
       let errFlg = this.validation();
 
       if (!errFlg) {
-        db.collection("works")
-          .doc(this.id)
-          .update({
-            title: this.title,
-            url: this.url,
-            description: this.description,
-            imagePath: this.imagePath,
-            category_id: this.categoryId,
-            updated_at: FirebaseTimestamp.now(),
-          })
-          .then(() => {
-            if (!this.isTweetFlg) {
-              axios
-                .put(apiUrl(this.id))
-                .then(() => {
-                  this.$router.push("/");
-                })
-                .catch((err) => {
-                  alert(err);
-                });
-            } else {
-              this.$router.push("/");
-            }
-          });
+        if (this.fileList == null) {
+          this.editWork(this.imageUrl);
+        } else {
+          let blob = new Blob(this.fileList, { type: "image/jpeg" });
+          let fileName;
+          fileName = genalateRandomFileName();
+          const uploadRef = storage.ref("images").child(fileName);
+          const uploadTask = uploadRef.put(blob);
+          uploadTask
+            .then(() => {
+              uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                this.editWork(downloadURL);
+              });
+            })
+            .catch(() => {
+              alert("インターネット接続を確認してからもう一度行ってください");
+            });
+        }
       } else {
         this.isLoadingFlg = true;
         this.loading = false;
       }
     },
+
+    // バリデーションメソッド
     validation() {
       let errFlg = false;
       if (this.title.length == 0) {
@@ -293,7 +282,7 @@ export default {
       } else {
         this.isDescriptionFlg = false;
       }
-      if (this.imagePath.length == 0) {
+      if (this.imageUrl == "") {
         this.isDropingFlg = true;
         errFlg = true;
       } else {
@@ -307,6 +296,8 @@ export default {
       }
       return errFlg;
     },
+
+    // ツイートするか否かのメソッド
     changeTweetFlg() {
       if (!this.isTweetFlg) {
         this.isTweetFlg = true;
@@ -314,20 +305,113 @@ export default {
         this.isTweetFlg = false;
       }
     },
+
+    // work情報追加
+    addWork(downloadURL) {
+      db.collection("works")
+        .add({
+          title: this.title,
+          url: this.url,
+          description: this.description,
+          imagePath: downloadURL,
+          category_id: Number(this.categoryId),
+          created_at: FirebaseTimestamp.now(),
+          updated_at: FirebaseTimestamp.now(),
+          deleted_flg: false,
+          deleted_at: "",
+        })
+        .then((doc) => {
+          if (!this.isTweetFlg) {
+            axios
+              .post(apiUrl(doc.id))
+              .then(() => {
+                this.$router.push("/");
+              })
+              .catch((err) => {
+                alert(err);
+              });
+          } else {
+            this.$router.push("/");
+          }
+        });
+    },
+
+    // work情報編集
+    editWork(downloadURL) {
+      db.collection("works")
+        .doc(this.id)
+        .update({
+          title: this.title,
+          url: this.url,
+          description: this.description,
+          imagePath: downloadURL,
+          category_id: Number(this.categoryId),
+          updated_at: FirebaseTimestamp.now(),
+        })
+        .then(() => {
+          if (!this.isTweetFlg) {
+            axios
+              .put(apiUrl(this.id))
+              .then(() => {
+                this.$router.push("/");
+              })
+              .catch((err) => {
+                alert(err);
+              });
+          } else {
+            this.$router.push("/");
+          }
+        });
+    },
   },
 };
 </script>
 
 <style scoped>
-.edit {
-  width: 100%;
+.required {
+  color: red;
 }
+
+.table {
+  width: 1000px;
+}
+
 td {
-  width: 100px;
   text-align: center;
 }
-.editImage {
-  border: 1px solid #000;
-  border-radius: 50%;
+@media screen and (min-width: 1026px) {
+  .imgContent {
+    width: 90%;
+    max-width: 700px;
+    height: 35vh;
+    margin: auto;
+    margin-bottom: 10px;
+    background-color: #ccc;
+    padding-top: 5%;
+  }
+}
+
+@media screen and (min-width: 482px) and (max-width: 1025px) {
+  .imgContent {
+    width: 90%;
+    max-width: 700px;
+    height: 20vh;
+    margin: auto;
+    margin-bottom: 10px;
+    background-color: #ccc;
+    padding-top: 5%;
+  }
+}
+
+@media screen and (max-width: 481px) {
+  .imgContent {
+    width: 90%;
+    max-width: 700px;
+    height: 200px;
+    margin: auto;
+    margin-bottom: 10px;
+    background-color: #ccc;
+    padding-top: 5%;
+  }
 }
 </style>
