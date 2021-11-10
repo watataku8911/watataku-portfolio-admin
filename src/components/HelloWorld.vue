@@ -1,5 +1,8 @@
 <template>
   <div class="hello">
+    <div class="load">
+      <pulse-loader :loading="loading"></pulse-loader>
+    </div>
     <table border="1" v-show="isLoadingFlg">
       <tr>
         <th>ID</th>
@@ -19,25 +22,21 @@
         <td v-html="nl2br(item[1].description)" style="text-align: left"></td>
         <td><img :src="item[1].imagePath" width="80" height="120" /></td>
         <td v-html="categoryName(item[1].category_id)"></td>
-        <!-- <td v-html="item[1].category_id"></td> -->
         <td>
-          <router-link :to="{ name: 'about', params: { id: item[0] } }">
-            <button>編集</button>
-          </router-link>
+          <Button :disabled="false" msg="編集" @push="goEdit(item[0])" />
         </td>
-        <td><button @click="deleted(item[0])">削除</button></td>
+        <td>
+          <Button :disabled="false" msg="削除" @push="deleted(item[0])" />
+        </td>
       </tr>
     </table>
-
-    <div class="load">
-      <pulse-loader :loading="loading"></pulse-loader>
-    </div>
   </div>
 </template>
 
 <script>
 import PulseLoader from "vue-spinner/src/PulseLoader";
 import { db, FirebaseTimestamp } from "../firebase/index";
+import Button from "./UIKit/Button";
 export default {
   name: "HelloWorld",
   data() {
@@ -48,6 +47,7 @@ export default {
     };
   },
   components: {
+    Button,
     PulseLoader,
   },
   created() {
@@ -68,6 +68,10 @@ export default {
             this.isLoadingFlg = true;
             this.loading = false;
           });
+        })
+        .catch(() => {
+          alert("インターネット接続を確認してからもう一度行ってください");
+          this.getWorks();
         });
     },
     nl2br(str) {
@@ -85,7 +89,7 @@ export default {
           categoryName = "WEBアプリ";
           break;
         case 3:
-          categoryName = "スマホアプリ";
+          categoryName = "モバイルアプリ";
           break;
         default:
           categoryName = "その他";
@@ -107,6 +111,9 @@ export default {
       } else {
         return;
       }
+    },
+    goEdit(id) {
+      this.$router.push({ name: "about", params: { id: id } });
     },
   },
 };
