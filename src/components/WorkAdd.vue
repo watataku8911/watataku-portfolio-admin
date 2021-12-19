@@ -122,7 +122,7 @@ export default {
       url: "",
       fileList: null,
       imageUrl: "",
-      categoryId: "",
+      categoryId: 0,
       categories: [],
       isSelected: false,
 
@@ -288,12 +288,6 @@ export default {
       } else {
         this.isDropingFlg = false;
       }
-      if (this.categoryId.length == 0) {
-        this.isCategoryIdFlg = true;
-        errFlg = true;
-      } else {
-        this.isCategoryIdFlg = false;
-      }
       return errFlg;
     },
 
@@ -379,7 +373,6 @@ export default {
 td {
   text-align: center;
 }
-
 @media screen and (min-width: 1026px) {
   .imgContent {
     width: 90%;
