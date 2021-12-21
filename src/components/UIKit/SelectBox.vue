@@ -1,6 +1,6 @@
 <template>
   <select :name="this.name" @input="updateValue" :value="this.categoryId">
-    <option disabled value="">選択してください</option>
+    <option disabled value="0">選択してください</option>
     <option
       v-for="(option, index) in this.options"
       :key="index"
