@@ -288,6 +288,12 @@ export default {
       } else {
         this.isDropingFlg = false;
       }
+      if (this.categoryId == 0) {
+        this.isCategoryIdFlg = true;
+        errFlg = true;
+      } else {
+        this.isCategoryIdFlg = false;
+      }
       return errFlg;
     },
 
